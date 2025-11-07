@@ -18,6 +18,9 @@ hmpps.secret:
     MEGANEXUS:
       secretId: live-hmpps-integration-api-preprod-2fa8e4a7ee3726fc
       queueId: plpsubscriberqueue
+    PND:
+      secretId: live-hmpps-integration-api-preprod-afea65e8d033b24c
+      queueId: pndsubscriberqueue
 
 notifier:
   schedule:
