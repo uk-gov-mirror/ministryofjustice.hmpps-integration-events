@@ -57,6 +57,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       log.info("Finished checking filter list for ${clientConfig.key}")
     } catch (e: Exception) {
       log.error("Error checking filter list for ${clientConfig.key}", e)
+      throw e
     }
   }
 
