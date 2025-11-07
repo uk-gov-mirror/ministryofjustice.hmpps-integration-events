@@ -46,11 +46,11 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
         val filterPolicy = objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(updatedFilterList)
 
-        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
-        secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
-
         // Update value in the SNS subscription itself
         integrationEventTopicService.updateSubscriptionAttributes(subscriber.queueId, "FilterPolicy", filterPolicy)
+
+        // Update value in Secrets Manager so it is available for future Terraform updates, and to detect changes
+        secretsManagerService.setSecretValue(subscriber.secretId, filterPolicy)
 
         log.info("Filter list for ${clientConfig.key} updated")
       }
