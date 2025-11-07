@@ -61,8 +61,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       }
       log.info("Finished checking filter list for ${clientConfig.key}")
     } catch (e: Exception) {
-      log.error("Error checking filter list for ${clientConfig.key}", e)
-      throw e
+      logAndCapture("Error checking filter list for ${clientConfig.key}", e)
     }
   }
 
@@ -137,6 +136,6 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
     e: Exception,
   ) {
     log.error(message, e.message)
-    Sentry.captureException(e)
+    Sentry.captureException(RuntimeException(message, e))
   }
 }
