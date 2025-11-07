@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsintegrationevents.services
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.sentry.Sentry
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -57,7 +58,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       log.info("Finished checking filter list for ${clientConfig.key}")
     } catch (e: Exception) {
       log.error("Error checking filter list for ${clientConfig.key}", e)
-      throw e
+      Sentry.captureException(e)
     }
   }
 
