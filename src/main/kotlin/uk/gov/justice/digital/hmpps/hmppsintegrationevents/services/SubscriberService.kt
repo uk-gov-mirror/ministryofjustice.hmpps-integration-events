@@ -21,15 +21,19 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
 
   @Scheduled(fixedRateString = "\${subscriber-checker.schedule.rate}")
   fun checkSubscriberFilterList() {
-    log.info("Checking subscriber filter list...")
+    try {
+      log.info("Checking subscriber filter list...")
 
-    val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
-    val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
+      val apiResponse = integrationApiGateway.getApiAuthorizationConfig()
+      val caseInsensitiveSecrets = subscriberProperties.secrets.mapKeys { it.key.uppercase() }
 
-    apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
-      .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
+      apiResponse.filter { client -> caseInsensitiveSecrets.containsKey(client.key.uppercase()) }
+        .forEach { refreshClientFilter(it, caseInsensitiveSecrets[it.key.uppercase()]!!) }
 
-    log.info("Subscriber filter list checked")
+      log.info("Subscriber filter list checked")
+    } catch (e: Exception) {
+      logAndCapture("Error checking filter list", e)
+    }
   }
 
   private fun refreshClientFilter(clientConfig: Map.Entry<String, ConfigAuthorisation>, subscriber: HmppsSecretManagerProperties.SecretConfig) {
@@ -58,7 +62,7 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       log.info("Finished checking filter list for ${clientConfig.key}")
     } catch (e: Exception) {
       log.error("Error checking filter list for ${clientConfig.key}", e)
-      Sentry.captureException(e)
+      throw e
     }
   }
 
@@ -126,5 +130,13 @@ class SubscriberService(private val integrationApiGateway: IntegrationApiGateway
       "/v1/persons/[^/]+/prisoner-base-location" to IntegrationEventType.PRISONER_BASE_LOCATION_CHANGED,
       "/v1/persons/.*/education/assessments" to IntegrationEventType.PERSON_EDUCATION_ASSESSMENTS_CHANGED,
     )
+  }
+
+  private fun logAndCapture(
+    message: String,
+    e: Exception,
+  ) {
+    log.error(message, e.message)
+    Sentry.captureException(e)
   }
 }
